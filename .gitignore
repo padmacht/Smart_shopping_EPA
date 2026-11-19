@@ -9,11 +9,8 @@ __pycache__/
 .venv/
 .env
 
-# Generated outputs (tracked later with DVC / MLflow instead of git)
-data/processed/*
-!data/processed/.gitkeep
-models/*
-!models/.gitkeep
+# Generated outputs. Trained models and customer segments ARE committed so the
+# deployed app (Streamlit Cloud, Render) can use them; experiment runs are not.
 mlruns/
 mlartifacts/
 

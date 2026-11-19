@@ -5,9 +5,7 @@ __pycache__
 .pytest_cache
 .ipynb_checkpoints
 .env
-data
-models
-reports
+data/external
 mlruns
 mlartifacts
 notebooks

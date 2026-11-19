@@ -27,3 +27,6 @@ uvicorn[standard]>=0.30,<1
 streamlit==1.45.1                # segmentation dashboard and chat interface
 python-dotenv>=1.0               # load local .env settings for the shopping assistant
 # evidently>=0.4                  # monitoring / drift reports
+
+# --- this project (src/shopsmart), so the app and API can import it anywhere ---
+-e .
