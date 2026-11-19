@@ -1,0 +1,240 @@
+// ShopSmart AI - VS Code workspace. Open THIS file: File > Open Workspace from File...
+// It holds the project settings, debug configurations (F5), tasks and recommended extensions.
+{
+  "folders": [
+    {
+      "name": "ShopSmart AI",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.env.windows": {
+      "PYTHONPATH": "${workspaceFolder}\\src",
+      "SHOPSMART_ROOT": "${workspaceFolder}"
+    },
+    "python.analysis.extraPaths": [
+      "${workspaceFolder}/src"
+    ],
+    "jupyter.notebookFileRoot": "${workspaceFolder}/notebooks",
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+      "tests"
+    ],
+    "files.associations": {
+      "*.csv": "csv"
+    },
+    "rainbow_csv.enable_auto_csv_lint": true,
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/*.egg-info": true
+    },
+    "search.exclude": {
+      "data/raw/interaction.csv": true,
+      ".venv": true,
+      "mlruns": true
+    },
+    "files.watcherExclude": {
+      "**/.venv/**": true,
+      "**/mlruns/**": true
+    },
+    "editor.rulers": [
+      120
+    ],
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "claudeCode.useTerminal": true
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run ShopSmart app (Streamlit)",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "streamlit",
+        "args": [
+          "run",
+          "app/app.py"
+        ],
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "SHOPSMART_ROOT": "${workspaceFolder}"
+        },
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Validate datasets",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "shopsmart.data.validate",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "SHOPSMART_ROOT": "${workspaceFolder}"
+        },
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Train segmentation (K-Means)",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "shopsmart.segmentation.train",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "SHOPSMART_ROOT": "${workspaceFolder}"
+        },
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Regenerate datasets (v3)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/data_generation/generate_dl_dataset.py",
+        "args": [
+          "--users",
+          "5000",
+          "--products",
+          "1500",
+          "--seed",
+          "42",
+          "--outdir",
+          "${workspaceFolder}/data/raw"
+        ],
+        "cwd": "${workspaceFolder}/scripts/data_generation",
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Python: current file",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${file}",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "SHOPSMART_ROOT": "${workspaceFolder}"
+        },
+        "console": "integratedTerminal"
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Setup: create venv + install requirements",
+        "type": "shell",
+        "command": "py -m venv .venv; .\\.venv\\Scripts\\python.exe -m pip install --upgrade pip; .\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt; .\\.venv\\Scripts\\python.exe -m pip install -e .",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Validate data",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.data.validate",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "List datasets",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -c \"from shopsmart.data import list_datasets; print(list_datasets().to_string())\"",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Train segmentation (K-Means)",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.segmentation.train",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Train recommenders",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.recommender.train",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Train two-tower (deep learning)",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.recommender.two_tower",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Evaluate search",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.search_eval",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run ShopSmart app",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m streamlit run app/app.py",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Segmentation: choose k (elbow/silhouette table)",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m shopsmart.segmentation.train --search-k",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run tests",
+        "type": "shell",
+        "command": ".\\.venv\\Scripts\\python.exe -m pytest -v",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-toolsai.jupyter",
+      "ms-toolsai.datawrangler",
+      "mechatroner.rainbow-csv",
+      "redhat.vscode-yaml",
+      "ms-python.black-formatter",
+      "ms-azuretools.vscode-docker"
+    ]
+  }
+}

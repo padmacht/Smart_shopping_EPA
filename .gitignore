@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environments and secrets
+.venv/
+.env
+
+# Generated outputs (tracked later with DVC / MLflow instead of git)
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+mlruns/
+mlartifacts/
+
+# OS / editor
+.DS_Store
+Thumbs.db

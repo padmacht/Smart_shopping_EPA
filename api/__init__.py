@@ -1,0 +1,1 @@
+"""ShopSmart inference API."""

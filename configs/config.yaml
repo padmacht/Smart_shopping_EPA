@@ -1,0 +1,130 @@
+# ShopSmart AI - project configuration
+# All paths are relative to the project root (C:\Smart_shopping_EPA).
+# Code never hard-codes a file path: it asks for a dataset by its NAME, e.g. load("interactions").
+
+project:
+  name: ShopSmart AI
+  random_seed: 42
+
+paths:
+  raw_data: data/raw
+  processed_data: data/processed
+  models: models
+  reports: reports
+  figures: reports/figures
+  mlruns: mlruns
+
+# ---------------------------------------------------------------------------
+# Dataset map: logical name -> file + how to read it
+# ---------------------------------------------------------------------------
+datasets:
+  products:
+    file: products.csv
+    description: Product catalogue (1,500 products, 9 categories, 90 product types)
+    primary_key: Product ID
+    parse_dates: [Launch Date]
+
+  users:
+    file: user_data.csv
+    description: Customer profiles (5,000 customers)
+    primary_key: User ID
+    parse_dates: [Signup Date]
+
+  interactions:
+    file: interaction.csv
+    description: Event log - views, clicks, carts, purchases, ratings (~354k events, 43k sessions)
+    primary_key: Event ID
+    parse_dates: [Timestamp]
+    foreign_keys:
+      User ID: users
+      Product ID: products
+
+  reviews:
+    file: reviews.csv
+    description: Written product reviews with 1-5 star ratings (sentiment analysis)
+    primary_key: Review ID
+    parse_dates: [Review Date]
+    foreign_keys:
+      User ID: users
+      Product ID: products
+
+  search_queries:
+    file: search_queries.csv
+    description: Labelled search queries for evaluating keyword vs semantic search
+    primary_key: Query ID
+
+  chatbot_intents:
+    file: chatbot_intents.csv
+    description: Chatbot utterances labelled with 16 intents and entities
+    primary_key: Utterance ID
+
+  faq:
+    file: faq.csv
+    description: Shop policy questions and answers for the chatbot
+
+  personas_truth:
+    file: customer_personas_truth.csv
+    description: HIDDEN true persona per customer - use ONLY to evaluate clustering, never as a feature
+    primary_key: User ID
+    evaluation_only: true
+
+# Settings used later in the project
+split:
+  test_fraction: 0.2        # last 20% of time = test set (recommenders, sequences)
+  method: time
+
+mlflow:
+  tracking_uri: mlruns
+  experiment_name: shopsmart-ai
+
+# Module A - customer segmentation (src/shopsmart/segmentation)
+segmentation:
+  n_clusters: 8             # chosen from the elbow / silhouette charts in notebook 02
+  k_search: [2, 12]         # range tried by `--search-k`
+  buyers_only: true         # non-buyers get their own segment (-1) instead of distorting the clusters
+  feature_set: extended     # "rfm" (as notebook 02) or "extended" (adds seasonality, brand loyalty, device)
+  output_file: customer_segments.csv
+  model_file: segmentation_kmeans.joblib
+
+# Module B - recommenders (src/shopsmart/recommender)
+recommender:
+  k: 10
+  item_weight: 0.7
+  model_file: recommenders.joblib
+  metrics_file: recommender_metrics.json
+
+# Module B (deep learning) - two-tower recommender (src/shopsmart/recommender/two_tower.py)
+two_tower:
+  model_file: two_tower.npz  # learned embeddings only, so the app needs no PyTorch
+  embedding_dim: 32
+  epochs: 6                 # chosen on a validation period inside the training data
+  samples_per_epoch: 300000
+  batch_size: 1024
+  learning_rate: 0.003
+  temperature: 0.2
+  logq_correction: true      # correct in-batch negatives for product popularity
+  seed: 42
+
+# Streamlit app (app/app.py) - display names for segment numbers.
+# Segment numbers can change when the K-Means model is retrained: update these names after retraining.
+app:
+  segment_names:
+    -1: Never bought
+    0: Premium Home Comfort
+    1: Families & Gifters
+    2: Readers
+    3: Active & Sporty
+    4: Tech Big Spenders
+    5: Everyday Regulars
+    6: Beauty & Self-Care
+    7: Bargain Browsers
+  segment_campaigns:
+    -1: First-order discount (WELCOME10) on popular items
+    0: Premium bedding collection with free delivery
+    1: Christmas gift guide from October, Toys and Books
+    2: 3-for-2 on books and new releases
+    3: Mobile push for new training kit and protein bundles
+    4: Early access to new gadgets and accessory bundles
+    5: Subscribe-and-save on pantry favourites
+    6: Skincare routine bundles from their favourite brands
+    7: Win-back voucher on everyday items

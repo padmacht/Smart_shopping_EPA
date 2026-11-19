@@ -1,0 +1,45 @@
+{
+  "split_method": "global chronological",
+  "cutoff": "2026-06-20T21:09:05",
+  "test_fraction": 0.2,
+  "train_events": 283472,
+  "test_events": 70868,
+  "k": 10,
+  "models": {
+    "popularity": {
+      "HitRate@10": 0.12426614481409001,
+      "NDCG@10": 0.04685817600438866,
+      "users_evaluated": 2044,
+      "test_users_with_purchases": 2205,
+      "users_skipped_seen_only": 161
+    },
+    "item_knn": {
+      "HitRate@10": 0.14187866927592954,
+      "NDCG@10": 0.05582314358300997,
+      "users_evaluated": 2044,
+      "test_users_with_purchases": 2205,
+      "users_skipped_seen_only": 161
+    },
+    "hybrid": {
+      "HitRate@10": 0.16389432485322897,
+      "NDCG@10": 0.06219844102397769,
+      "users_evaluated": 2044,
+      "test_users_with_purchases": 2205,
+      "users_skipped_seen_only": 161
+    },
+    "two_tower": {
+      "HitRate@10": 0.13454011741682975,
+      "NDCG@10": 0.05019442939307584,
+      "users_evaluated": 2044,
+      "test_users_with_purchases": 2205,
+      "users_skipped_seen_only": 161,
+      "type": "deep learning",
+      "settings": {
+        "embedding_dim": 32,
+        "epochs": 6,
+        "temperature": 0.2,
+        "seed": 42
+      }
+    }
+  }
+}

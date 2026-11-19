@@ -1,0 +1,57 @@
+services:
+  mlflow:
+    build: .
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - sqlite:////mlflow/mlflow.db
+      - --artifacts-destination
+      - /mlflow/artifacts
+      - --allowed-hosts
+      - mlflow,localhost,127.0.0.1
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.5b}
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models:ro
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+  app:
+    build: .
+    command: ["streamlit", "run", "app/app.py", "--server.address", "0.0.0.0", "--server.port", "8501"]
+    ports:
+      - "8501:8501"
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.5b}
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models:ro
+      - ./reports:/app/reports:ro
+
+volumes:
+  mlflow_data:

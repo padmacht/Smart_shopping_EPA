@@ -1,0 +1,10 @@
+# ShopSmart AI theme (green). Streamlit reads this file when you run the app from C:\Smart_shopping_EPA.
+[theme]
+primaryColor = "#1F6B55"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF4F0"
+textColor = "#1B3229"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"

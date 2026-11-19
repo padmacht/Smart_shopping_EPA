@@ -1,0 +1,12 @@
+{
+  "silhouette": 0.11022258138044119,
+  "davies_bouldin": 2.063673388745734,
+  "calinski_harabasz": 316.8533593085478,
+  "inertia": 60339.73165869675,
+  "n_clustered": 4505,
+  "n_non_buyers": 427,
+  "k": 8,
+  "feature_set": "extended",
+  "buyers_only": true,
+  "ari_vs_personas": 0.21712818736991088
+}

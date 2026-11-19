@@ -1,0 +1,32 @@
+{
+  "model": "keyword search (search_catalog, no Ollama)",
+  "k": 10,
+  "queries": 515,
+  "Hit@10_overall": 0.8718446601941747,
+  "by_query_type": {
+    "filtered_brand": {
+      "Hit@10": 1.0,
+      "queries": 90
+    },
+    "filtered_colour": {
+      "Hit@10": 1.0,
+      "queries": 62
+    },
+    "filtered_price": {
+      "Hit@10": 0.9886363636363636,
+      "queries": 88
+    },
+    "gift": {
+      "Hit@10": 0.6,
+      "queries": 5
+    },
+    "keyword": {
+      "Hit@10": 1.0,
+      "queries": 90
+    },
+    "semantic": {
+      "Hit@10": 0.65,
+      "queries": 180
+    }
+  }
+}
