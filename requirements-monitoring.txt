@@ -1,0 +1,2 @@
+# Monitoring extras: installed only by the weekly retrain job (and locally to run drift reports)
+evidently>=0.7,<0.8

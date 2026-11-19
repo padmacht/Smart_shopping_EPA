@@ -1,13 +1,15 @@
 # ShopSmart AI - CI/CD pipeline (GitHub Actions)
 #
 # On every push and pull request:
-#   1. test     - install, validate the data, run pytest, check model quality
+#   1. test     - install, validate the data, run pytest, check model quality,
+#                 compare keyword vs sentence-embedding search (results on the run's summary page)
 #   2. docker   - build the Docker image and smoke-test the API inside it
 # Render deploys only after these checks pass (Render: Settings > Auto-Deploy > "After CI Checks Pass").
 #
 # Every Monday (and on demand from the Actions tab):
-#   3. retrain  - retrain segmentation + recommenders from the raw data, log runs to MLflow,
-#                 re-check quality, and keep the MLflow runs and reports as a downloadable artifact.
+#   3. retrain  - check data drift with Evidently, retrain segmentation + recommenders from the raw
+#                 data, log runs to MLflow, re-check quality, and keep the drift report, MLflow runs
+#                 and reports as a downloadable artifact.
 
 name: CI
 
@@ -34,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           cache: pip
@@ -53,6 +55,9 @@ jobs:
       - name: Model quality gate
         run: python scripts/check_model_quality.py
 
+      - name: Evaluate search (keyword vs sentence embeddings)
+        run: python -m shopsmart.search_eval
+
   docker:
     name: Build and smoke-test Docker image
     if: github.event_name != 'schedule'
@@ -60,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build image
         run: docker build -t shopsmart:${{ github.sha }} .
@@ -86,18 +91,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           cache: pip
 
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt -r requirements-monitoring.txt
 
       - name: Validate data
         run: python -m shopsmart.data.validate
+
+      - name: Data drift report (Evidently)
+        run: python -m shopsmart.drift
 
       - name: Train customer segmentation (K-Means)
         run: python -m shopsmart.segmentation.train
@@ -110,11 +118,12 @@ jobs:
 
       - name: Keep MLflow runs, metrics and models
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: retrain-${{ github.run_number }}
           path: |
             mlruns/
+            reports/drift/
             reports/*.json
             reports/*.csv
             models/

@@ -229,6 +229,13 @@ Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in the environment to override the loca
 | After the tests pass | **Build and smoke-test Docker image** | Builds the image, starts the API inside it, calls `/health`, `/recommendations` and `/segments` |
 | Mondays 06:17 UTC, or *Run workflow* in the Actions tab | **Retrain and evaluate models** | Retrains K-Means and the recommenders from the raw data, logs runs to MLflow, re-runs the quality gate, keeps `mlruns/`, reports and models as a downloadable artifact for 30 days |
 
+The test job also runs `python -m shopsmart.search_eval`, which compares keyword search with
+sentence-embedding search (`src/shopsmart/semantic_search.py`, Model2Vec `minishlab/potion-base-8M`,
+NumPy only) and a hybrid of both on the 515 labelled queries; the table appears on the run's summary page.
+The retrain job starts with an Evidently data drift report (`python -m shopsmart.drift`): the newest 20%
+of events against the training period, per column, kept in the run's artifact as `reports/drift/`.
+To run it locally: `pip install -r requirements-monitoring.txt` then `python -m shopsmart.drift`.
+
 The quality gate fails the pipeline if Hybrid (the deployed recommender) does not beat the best-seller
 baseline on HitRate@10, or if the segments are no better than chance (ARI <= 0).
 
