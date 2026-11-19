@@ -8,6 +8,7 @@ from typing import Literal
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import RedirectResponse
 
 from shopsmart.config import CONFIG, path
 from shopsmart.data import load
@@ -40,6 +41,12 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    """Send visitors of the bare address to the interactive API docs."""
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")

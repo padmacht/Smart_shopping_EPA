@@ -43,3 +43,10 @@ def test_segment_endpoint_returns_not_found_for_unknown_customer():
         main.get_customer_segment(123)
 
     assert exc_info.value.status_code == 404
+
+
+def test_root_redirects_to_docs():
+    response = main.root()
+
+    assert response.status_code == 307
+    assert response.headers["location"] == "/docs"

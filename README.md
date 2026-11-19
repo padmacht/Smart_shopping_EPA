@@ -1,5 +1,7 @@
 # ShopSmart AI
 
+[![CI](https://github.com/padmacht/Smart_shopping_EPA/actions/workflows/ci.yml/badge.svg)](https://github.com/padmacht/Smart_shopping_EPA/actions/workflows/ci.yml)
+
 Customer segmentation, personalised recommendations and an AI shopping assistant (chatbot),
 built with applied data science, machine learning, deep learning and MLOps through to deployment.
 
@@ -213,6 +215,25 @@ Services are available at Streamlit `http://localhost:8501`, API docs `http://lo
 and MLflow `http://localhost:5000`. Model/data/report directories are mounted read-only into
 the application containers; MLflow state persists in the `mlflow_data` Docker volume.
 Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in the environment to override the local LLM defaults.
+
+## CI/CD and deployment
+
+**Live API:** https://smart-shopping-epa.onrender.com/docs (Render free tier: the first request after
+15 idle minutes takes about a minute while it wakes up).
+
+`.github/workflows/ci.yml` runs on GitHub Actions:
+
+| Trigger | Job | What it does |
+|---|---|---|
+| Every push and pull request | **Test and quality gate** | Installs `requirements.txt`, validates the data, runs pytest, runs `scripts/check_model_quality.py` |
+| After the tests pass | **Build and smoke-test Docker image** | Builds the image, starts the API inside it, calls `/health`, `/recommendations` and `/segments` |
+| Mondays 06:17 UTC, or *Run workflow* in the Actions tab | **Retrain and evaluate models** | Retrains K-Means and the recommenders from the raw data, logs runs to MLflow, re-runs the quality gate, keeps `mlruns/`, reports and models as a downloadable artifact for 30 days |
+
+The quality gate fails the pipeline if Hybrid (the deployed recommender) does not beat the best-seller
+baseline on HitRate@10, or if the segments are no better than chance (ARI <= 0).
+
+Deployment: Render builds the `Dockerfile` from `main`. Set Render's *Settings → Auto-Deploy* to
+**After CI Checks Pass** so a commit is only deployed once the pipeline above is green.
 
 ## Roadmap
 | Week | Phase |
